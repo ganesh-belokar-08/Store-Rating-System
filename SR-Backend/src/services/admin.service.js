@@ -7,15 +7,48 @@ import emailService from "./email.service.js";
 
 class AdminService {
   async createUser(data) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const plainPassword = data.password; // Store plain password to send in email
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
     const user = await User.create({
       ...data,
       password: hashedPassword,
     });
 
-    await emailService.sendAdminCreatedEmail(user.email, user.name);
+    await emailService.sendAdminCreatedEmail(
+      user.email,
+      user.name,
+      plainPassword
+    );
 
     return { message: "User created successfully" };
+  }
+
+  async createStoreOwner(data) {
+    const { name, email, address, password } = data;
+
+    // Check if user with the same email already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new Error("A user with this email already exists.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      address,
+      password: hashedPassword,
+      role: "STORE_OWNER",
+    });
+
+    await emailService.sendStoreOwnerCredentials(email, name, {
+      email,
+      password,
+    });
+
+    return { message: "Store Owner created successfully" };
   }
 
   async createStore(data) {

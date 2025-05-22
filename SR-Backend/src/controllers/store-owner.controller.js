@@ -1,6 +1,6 @@
 import storeOwnerService from "../services/store-owner.service.js";
 
-const getRatings = async (req, res, next) => {
+export const getRatings = async (req, res, next) => {
   try {
     const ratings = await storeOwnerService.getRatings(req.user.id);
     res.json(ratings);
@@ -9,7 +9,7 @@ const getRatings = async (req, res, next) => {
   }
 };
 
-const getAverageRating = async (req, res, next) => {
+export const getAverageRating = async (req, res, next) => {
   try {
     const result = await storeOwnerService.getAverageRating(req.user.id);
     res.json(result);
@@ -17,5 +17,3 @@ const getAverageRating = async (req, res, next) => {
     next(error);
   }
 };
-
-export { getRatings, getAverageRating };
