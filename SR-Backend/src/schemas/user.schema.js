@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const createUserSchema = z.object({
+export const createUserSchema = z.object({
   name: z.string().min(20).max(60),
   email: z.string().email(),
   address: z.string().max(400),
@@ -13,10 +13,10 @@ const createUserSchema = z.object({
       /[!@#$%^&*(),.?":{}|<>]/,
       "Password must contain at least one special character"
     ),
-  role: z.enum(["ADMIN", "USER", "STORE_OWNER"]),
+  role: z.enum(["ADMIN", "USER", "STORE_OWNER"]).optional(),
 });
 
-const userFilterSchema = z.object({
+export const userFilterSchema = z.object({
   name: z.string().optional(),
   email: z.string().email().optional(),
   address: z.string().optional(),
@@ -25,4 +25,26 @@ const userFilterSchema = z.object({
   sortOrder: z.enum(["ASC", "DESC"]).optional(),
 });
 
-export { createUserSchema, userFilterSchema };
+export const createStoreOwnerSchema = z.object({
+  name: z
+    .string()
+    .min(20, "Name must be at least 20 characters")
+    .max(60, "Name must be at most 60 characters")
+    .optional(),
+  email: z
+    .string({ required_error: "Email is required" })
+    .email("Invalid email format"),
+  address: z
+    .string()
+    .max(400, "Address must be under 400 characters")
+    .optional(),
+  password: z
+    .string({ required_error: "Password is required" })
+    .min(8, "Password must be at least 8 characters")
+    .max(16, "Password must be at most 16 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(
+      /[!@#$%^&*(),.?":{}|<>]/,
+      "Password must contain at least one special character"
+    ),
+});

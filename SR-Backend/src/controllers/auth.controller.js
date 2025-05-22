@@ -23,7 +23,6 @@ export const login = async (req, res, next) => {
     loginSchema.parse(req.body);
     const result = await authService.login(req.body);
 
-    // Set JWT token in HttpOnly cookie
     res.cookie("token", result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

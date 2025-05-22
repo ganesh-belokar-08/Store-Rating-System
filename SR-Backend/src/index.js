@@ -10,11 +10,46 @@ import errorMiddleware from "./middleware/error.js";
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS configuration
+app.use(
+  cors({
+    origin: "*", // Allow all origins for testing; adjust for production
+    credentials: true, // Allow cookies to be sent
+  })
+);
+
+// Parse JSON bodies
 app.use(express.json());
 
-app.use(cookieParser()); // Add this before routes
+// Parse cookies
+app.use(cookieParser());
+
+// Log incoming requests for debugging
+app.use((req, res, next) => {
+  console.log("Incoming Request - Method:", req.method);
+  console.log("Incoming Request - URL:", req.url);
+  console.log("Incoming Request - Headers:", req.headers);
+  console.log("Incoming Request - Body (Before Parsing):", req.body);
+  next();
+});
+
+// Fallback to parse raw body if express.json() fails
+app.use(express.raw({ type: "application/json" }));
+app.use((req, res, next) => {
+  if (
+    req.headers["content-type"] === "application/json" &&
+    Buffer.isBuffer(req.body)
+  ) {
+    try {
+      req.body = JSON.parse(req.body.toString());
+      console.log("Manually Parsed Body:", req.body);
+    } catch (error) {
+      console.error("Manual Parsing Error:", error);
+      return res.status(400).json({ message: "Invalid JSON body" });
+    }
+  }
+  next();
+});
 
 // Health Check Endpoint
 app.get("/api/health", async (req, res) => {
@@ -40,6 +75,5 @@ app.use(errorMiddleware);
 // Start server
 const PORT = process.env.PORT || 3000;
 sequelize.sync().then(() => {
-  // Removed force: true
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });

@@ -29,18 +29,42 @@ class EmailService {
     }
   }
 
-  async sendAdminCreatedEmail(to, name) {
+  async sendAdminCreatedEmail(to, name, plainPassword) {
     try {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to,
-        subject: "Account Created by Admin",
-        text: `Hi ${name},\n\nYour account has been created by an admin! Welcome to StoreRater.`,
+        subject: "Welcome to StoreRater – Your Account is Ready!",
+        text: `Hi ${name},
+  
+  Welcome to StoreRater! Your account has been successfully created by our system administrator.
+  
+  You can now log in using the following credentials:
+  
+  Email: ${to}
+  Temporary Password: ${plainPassword}
+  
+  ⚠️ Please log in and change your password immediately for security reasons.
+  
+  If you face any issues, feel free to reach out to our support team.
+  
+  Thanks,  
+  StoreRater Team`,
       });
     } catch (error) {
-      console.error("Error sending admin created email:", error);
-      throw new Error("Failed to send admin created email");
+      console.error("Error sending admin-created email:", error);
+      throw new Error("Failed to send welcome email");
     }
+  }
+
+  async sendStoreOwnerCredentials(email, name, credentials) {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your StoreRater Store Owner Account Details",
+      text: `Hello ${name},\n\nYour Store Owner account has been created by an admin.\n\nHere are your login credentials:\nEmail: ${credentials.email}\nPassword: ${credentials.password}\n\nPlease log in and change your password for security.\n\nBest regards,\nStoreRater Team`,
+    };
+    await transporter.sendMail(mailOptions);
   }
 }
 

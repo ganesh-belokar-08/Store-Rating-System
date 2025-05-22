@@ -5,7 +5,7 @@ import {
 } from "../schemas/rating.schema.js";
 import userService from "../services/user.service.js";
 
-const getStores = async (req, res, next) => {
+export const getStores = async (req, res, next) => {
   try {
     storeFilterSchema.parse(req.query);
     const stores = await userService.getStores(req.user.id, req.query);
@@ -17,7 +17,7 @@ const getStores = async (req, res, next) => {
   }
 };
 
-const submitRating = async (req, res, next) => {
+export const submitRating = async (req, res, next) => {
   try {
     createRatingSchema.parse(req.body);
     const result = await userService.submitRating(req.user.id, req.body);
@@ -29,7 +29,7 @@ const submitRating = async (req, res, next) => {
   }
 };
 
-const updateRating = async (req, res, next) => {
+export const updateRating = async (req, res, next) => {
   try {
     const { rating } = createRatingSchema.parse(req.body);
     const result = await userService.updateRating(
@@ -44,5 +44,3 @@ const updateRating = async (req, res, next) => {
     );
   }
 };
-
-export { getStores, submitRating, updateRating };
