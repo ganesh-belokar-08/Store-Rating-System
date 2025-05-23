@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
-import User from "./user.model.js";
 
 const Store = sequelize.define(
   "Store",
@@ -35,8 +34,9 @@ const Store = sequelize.define(
     ownerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      unique: true,
       references: {
-        model: User,
+        model: "users", // Use table name as string
         key: "id",
       },
       onDelete: "RESTRICT",
@@ -44,6 +44,7 @@ const Store = sequelize.define(
   },
   {
     timestamps: true,
+    tableName: "stores",
     indexes: [
       { fields: ["name"] },
       { fields: ["email"] },
@@ -51,7 +52,5 @@ const Store = sequelize.define(
     ],
   }
 );
-
-Store.belongsTo(User, { foreignKey: "ownerId" });
 
 export default Store;

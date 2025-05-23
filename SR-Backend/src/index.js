@@ -7,6 +7,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import storeOwnerRoutes from "./routes/store-owner.routes.js";
 import errorMiddleware from "./middleware/error.js";
+import associations from "./models/associations.js";
 
 const app = express();
 
@@ -74,6 +75,32 @@ app.use(errorMiddleware);
 
 // Start server
 const PORT = process.env.PORT || 3000;
-sequelize.sync().then(() => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
+async function startServer() {
+  try {
+    // Sync each model individually to handle index errors gracefully
+    for (const model of Object.values(associations)) {
+      try {
+        await model.sync({ force: false, alter: true }); // Use alter: true to update schema safely
+        console.log(`Model ${model.name} synced successfully`);
+      } catch (error) {
+        if (
+          error.name === "SequelizeDatabaseError" &&
+          error.parent.code === "42P07"
+        ) {
+          console.warn(
+            `Index already exists for ${model.name}, skipping: ${error.message}`
+          );
+          continue; // Skip duplicate index errors
+        }
+        throw error; // Rethrow other errors
+      }
+    }
+    console.log("Database synced successfully");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error("Error starting server:", error);
+    process.exit(1); // Exit on critical errors
+  }
+}
+
+startServer();

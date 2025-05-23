@@ -19,17 +19,18 @@ class UserService {
       include: [
         {
           model: Rating,
+          as: "UserRating", // Alias for user-specific rating
           attributes: ["rating"],
           where: { userId },
           required: false,
         },
         {
           model: Rating,
-          as: "Ratings",
+          as: "AllRatings", // Alias for all ratings
           attributes: ["rating"],
         },
       ],
-      group: ["Store.id"],
+      group: ["Store.id", "UserRating.rating", "AllRatings.rating"], // Include aliases in group
       raw: true,
       nest: true,
     });
@@ -38,11 +39,11 @@ class UserService {
       id: store.id,
       name: store.name,
       address: store.address,
-      userRating: store.Ratings?.rating || null,
-      overallRating: store.Ratings.length
+      userRating: store.UserRating?.rating || null, // Use UserRating alias
+      overallRating: store.AllRatings.length
         ? (
-            store.Ratings.reduce((sum, r) => sum + r.rating, 0) /
-            store.Ratings.length
+            store.AllRatings.reduce((sum, r) => sum + r.rating, 0) /
+            store.AllRatings.length
           ).toFixed(1)
         : null,
     }));

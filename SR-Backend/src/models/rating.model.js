@@ -1,7 +1,5 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
-import User from "./user.model.js";
-import Store from "./store.model.js";
 
 const Rating = sequelize.define(
   "Rating",
@@ -15,7 +13,7 @@ const Rating = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Store,
+        model: "stores",
         key: "id",
       },
       onDelete: "CASCADE",
@@ -24,7 +22,7 @@ const Rating = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: User,
+        model: "users",
         key: "id",
       },
       onDelete: "CASCADE",
@@ -40,6 +38,7 @@ const Rating = sequelize.define(
   },
   {
     timestamps: true,
+    tableName: "ratings",
     indexes: [
       { fields: ["storeId"] },
       { fields: ["userId"] },
@@ -47,10 +46,5 @@ const Rating = sequelize.define(
     ],
   }
 );
-
-Rating.belongsTo(Store, { foreignKey: "storeId" });
-Rating.belongsTo(User, { foreignKey: "userId" });
-Store.hasMany(Rating, { foreignKey: "storeId" });
-User.hasMany(Rating, { foreignKey: "userId" });
 
 export default Rating;
